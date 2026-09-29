@@ -9,7 +9,7 @@ A multi-container approach via docker-compose file has been used to allow the vi
 
 1. Ensure docker desktop is installed
 2. Pull the repo
-3. Direct yourself to the multi-container-app then run:
+3. Direct yourself to the multi-container-app folder in a terminal session then run:
 
 ```bash
 docker-compose up --build
