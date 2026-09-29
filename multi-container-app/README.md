@@ -3,7 +3,7 @@
 Visit counter is a simple containerised web app, by default it directs you to a welcome page whereas /count directs you to a page where the counter updates dynamically depending on the amount of times the page has been visited.
 
 # Multi-containers
-A docker-compose file has been used to allow the visit count to persist between instances a docker volume with a redis database has been used.
+A multi-container approach via docker-compose file has been used to allow the visit count to persist between instances a docker volume with a redis database has been used.
 
 ## Installation
 
