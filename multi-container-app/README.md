@@ -26,7 +26,53 @@ Completing this module provided deep insight into container ecosystems and archi
 
 * **Nginx Reverse Proxy & Load Balancing:** Integrated an Nginx container acting as a reverse proxy to manage incoming traffic, distribute client requests efficiently across application instances, and shield the underlying application servers.
 
+---
 
+## Image Optimisation
+
+I rebuilt the web image to make it smaller and more secure, then measured the result.
+
+| Image | Disk usage | Content size (compressed) |
+|---|---|---|
+| Original (`python:3.8-slim`) | 212 MB | 52.8 MB |
+| Optimised (multi-stage, distroless) | 106 MB | 25.8 MB |
+
+Both versions behave identically. I checked this by running each on its own
+and confirming the same result.
+
+### Decisions
+
+**1. Multi-stage build with a distroless runtime**
+- Why: the final image contains only Python, my dependencies and `count.py`:
+  no shell, no package manager, no pip. Fewer bytes to push and pull, and
+  fewer tools for an attacker to use.
+- Considered: `python:slim` (still ships a shell, apt and pip) and
+  `python:alpine` (smaller, but uses a different C library that some
+  compiled packages don't support).
+- Trade-off: I can't open a shell inside the running container to debug it.
+
+**2. Upgraded Python 3.8 → 3.13**
+- Why: Python 3.8 stopped getting security fixes in October 2024, and pip was
+ installing older Flask versions to stay compatible with it.
+- Note: the build stage and runtime must use the same Python version
+
+**3. Pinned dependencies in `requirements.txt`**
+- Why: every build installs exactly the same versions, so the same code
+  always produces the same image.
+- It lists all 8 packages, not just Flask and redis, because Flask pulls in
+  6 others.
+- Trade-off: versions have to be updated deliberately.
+
+**4. Runs as a non-root user**
+- Why: if the app is ever compromised, the attacker doesn't have root inside
+  the container.
+
+### What I learnt
+- Image layers only add. Deleting a file in a later step doesn't make the
+  image smaller
+- The base image was most of the size
+- "Content size" is the compressed size that actually travels to a registry
+  like ECR, so it's the number that affects push and pull times.
 ---
 
 ## Installation & Getting Started
